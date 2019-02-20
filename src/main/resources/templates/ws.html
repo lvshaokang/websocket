@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>stomp</title>
+</head>
+
+<body>
+
+<h1>群聊</h1>
+<input id="text" type="text" title="text"/>
+<button onclick="send()">发送消息</button>
+<hr/>
+<button onclick="closeWebSocket()">关闭WebSocket连接</button>
+<hr/>
+<div id="message"></div>
+
+
+<!--<h1>一对一</h1>
+<input id="text1" type="text" title="text"/>
+<button onclick="send1()">发送消息</button>
+<button onclick="subscribe1()">订阅消息/topic/send1</button>
+<hr/>
+<button onclick="closeWebSocket()">关闭WebSocket连接</button>
+<hr/>
+<div id="message1"></div>-->
+
+
+</body>
+
+<script src="/static/js/stomp.min.js"></script>
+<script src="/static/js/sockjs.min.js"></script>
+
+<script type="text/javascript">
+    // 建立连接对象（还未发起连接）
+    var socket = new SockJS("http://localhost:8080/ws");
+
+    // 获取 STOMP 子协议的客户端对象
+    var stompClient = Stomp.over(socket);
+
+    // 向服务器发起websocket连接并发送CONNECT帧
+    stompClient.connect(
+        {},
+        function connectCallback(frame) {
+            // 连接成功时（服务器响应 CONNECTED 帧）的回调方法
+            setMessageInnerHTML("连接成功");
+            stompClient.subscribe('/topic/subscribe', function (response) {
+                var returnData = JSON.parse(response.body);
+                setMessageInnerHTML("群聊 -> 客户端 ->  接收的消息为: " + returnData.respMsg);
+            });
+        },
+        function errorCallBack(error) {
+            // 连接失败时（服务器响应 ERROR 帧）的回调方法
+            setMessageInnerHTML("连接失败");
+        }
+    );
+
+    //发送消息
+    function send() {
+        var message = document.getElementById('text').value;
+        var messageJson = JSON.stringify({ "name": message });
+        stompClient.send("/send", {token:"token"}, messageJson);
+        // stompClient.send("/send", {}, messageJson);
+        setMessageInnerHTML("群聊 -> 客户端 -> 发送的消息为: " + message);
+    }
+
+    //将消息显示在网页上
+    function setMessageInnerHTML(innerHTML) {
+        document.getElementById('message').innerHTML += innerHTML + '<br/>';
+    }
+
+</script>
+
+
+<!--<script type="text/javascript">
+    // 建立连接对象（还未发起连接）
+    var socket = new SockJS("http://localhost:8080/ws/point");
+
+    // 获取 STOMP 子协议的客户端对象
+    var stompClient = Stomp.over(socket);
+
+    // 向服务器发起websocket连接并发送CONNECT帧
+    stompClient.connect(
+        {},
+        function connectCallback(frame) {
+            // 连接成功时（服务器响应 CONNECTED 帧）的回调方法
+            setMessageInnerHTML("连接成功");
+            stompClient.subscribe('/user/subscribe', function (response) {
+                var returnData = JSON.parse(response.body);
+                setMessageInnerHTML("一对一 -> 客户端 ->  接收的消息为: " + returnData.respMsg);
+            });
+        },
+        function errorCallBack(error) {
+            // 连接失败时（服务器响应 ERROR 帧）的回调方法
+            setMessageInnerHTML("连接失败");
+        }
+    );
+
+    //发送消息
+    function send1() {
+        var message = document.getElementById('text1').value;
+        var messageJson = JSON.stringify({ "name": message });
+        stompClient.send("/send1", {userId:"1"}, messageJson);
+        // stompClient.send("/send", {}, messageJson);
+        setMessageInnerHTML("一对一 -> 客户端 -> 发送的消息为: " + message);
+    }
+
+    //将消息显示在网页上
+    function setMessageInnerHTML(innerHTML) {
+        document.getElementById('message1').innerHTML += innerHTML + '<br/>';
+    }
+
+</script>-->
+
+</html>
+
