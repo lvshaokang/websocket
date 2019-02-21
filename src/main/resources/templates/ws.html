@@ -40,7 +40,7 @@
 
     // 向服务器发起websocket连接并发送CONNECT帧
     stompClient.connect(
-        {},
+        {'Auth-Token':'123456'},
         function connectCallback(frame) {
             // 连接成功时（服务器响应 CONNECTED 帧）的回调方法
             setMessageInnerHTML("连接成功");
